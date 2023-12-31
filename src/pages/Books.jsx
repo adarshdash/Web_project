@@ -4,7 +4,7 @@ import ml from "../img/ml.png";
 import story from "../img/story.jpg";
 import { Link } from "react-router-dom";
 import { Footer } from "../component/footer/Footer";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import bookService from "../service/book.service";
 import { useState } from "react";
 import { BASE_API_URL } from "../common/constant";
@@ -12,10 +12,24 @@ import { toast, ToastContainer } from "react-toastify";
 
 const Books = () => {
   const [book, setBook] = useState([]);
+  const books = useRef(null);
 
   useEffect(() => {
     init();
   }, []);
+
+  const handleSelect = (e) => {
+    const filterItem = e.target.value;
+    if (filterItem !== "All") {
+      // console.log("book",books);
+      const filteredAccessories = books.current.filter(
+        (item) => item?.category.categoryName === filterItem
+      );
+      setBook(filteredAccessories);
+    } else {
+      setBook(books.current);
+    }
+  };
 
   const init = () => {
     bookService
@@ -23,6 +37,7 @@ const Books = () => {
       .then((res) => {
         //console.log(res.data);
         setBook(res.data);
+        books.current = res.data;
       })
       .catch((error) => {
         console.log(error);
@@ -31,31 +46,31 @@ const Books = () => {
 
   const [ch, setCh] = useState();
 
-  const handleSearch = (e) => {
-    setCh(e.target.value);
-  };
+  // const handleSearch = (e) => {
+  //   setCh(e.target.value);
+  // };
 
-  const search = (e) => {
-    e.preventDefault();
+  // const search = (e) => {
+  //   e.preventDefault();
 
-    if (!ch) {
-      init();
-    } else {
-      bookService
-        .searchBook(ch)
-        .then((res) => {
+  //   if (!ch) {
+  //     init();
+  //   } else {
+  //     bookService
+  //       .searchBook(ch)
+  //       .then((res) => {
 
-          if (res.data.length > 0) {
-            setBook(res.data);
-          } else {
-            notify();
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  };
+  //         if (res.data.length > 0) {
+  //           setBook(res.data);
+  //         } else {
+  //           notify();
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   }
+  // };
 
   const notify = () => {
     toast.error("Not Available", {
@@ -76,7 +91,7 @@ const Books = () => {
       >
         <div className="row ">
           <div className="col-md-8 offset-md-2">
-            <form onSubmit={(e) => search(e)} method="post">
+            {/* <form onSubmit={(e) => search(e)} method="post">
               <div className="input-group">
                 <input
                   type="text"
@@ -88,11 +103,20 @@ const Books = () => {
                   Search
                 </button>
               </div>
-            </form>
+            </form> */}
           </div>
         </div>
       </div>
       <div className="cotainer mt-2">
+        {/* filtering */}
+        <div className="filter">
+        <p>Filter:</p>
+      <select onChange={(e) => handleSelect(e)}>
+          <option>All</option>
+          <option>Interior</option>
+          <option>Exterior</option>
+        </select>
+        </div>
         <div className="row">
           <div className="col-md-12">
             <div className="card paint-card bg-image hover-overlay hover-zoom hover-shadow ripple">
